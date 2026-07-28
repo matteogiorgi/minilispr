@@ -71,11 +71,36 @@ tokenize <- function(src) {
 
 ## 2. Reader -- turns the flat token stream into nested lists (our
 ## S-expressions). Atoms are given their final R type right here.
+
+unescape_string <- function(s) { # single left-to-right scan, so \\n stays
+    chars <- strsplit(s, "", fixed = TRUE)[[1]] # "escaped backslash + n" and is never confused with \n
+    n <- length(chars)
+    out <- character(0)
+    i <- 1L
+    while (i <= n) {
+        if (chars[[i]] == "\\" && i < n) {
+            nxt <- chars[[i + 1L]]
+            repl <- switch(nxt,
+                "n" = "\n",
+                "t" = "\t",
+                "\"" = "\"",
+                "\\" = "\\",
+                paste0("\\", nxt) # unrecognized escape: keep both characters as-is
+            )
+            out <- c(out, repl)
+            i <- i + 2L
+        } else {
+            out <- c(out, chars[[i]])
+            i <- i + 1L
+        }
+    }
+    paste(out, collapse = "")
+}
+
 atom <- function(tok) {
     if (startsWith(tok, "\"")) { # string: strip the surrounding quotes, then unescape
         inner <- substr(tok, 2L, nchar(tok) - 1L)
-        inner <- gsub("\\\"", "\"", inner, fixed = TRUE)
-        return(inner)
+        return(unescape_string(inner))
     }
 
     # TRUE/FALSE and their R aliases T/F are resolved to actual booleans right
@@ -247,7 +272,7 @@ lisp_eval <- function(src, env = new.env(parent = globalenv())) {
 ## by sys.nframe() == 0L so it only fires when this file is executed
 ## directly (`./minilisp.r program.lisp` or `Rscript minilisp.r program.lisp`)
 ## and stays inert when the file is source()'d as a library, which is what
-## test_minilisp.r does (sourcing always happens from inside a deeper call
+## test.r does (sourcing always happens from inside a deeper call
 ## frame, so sys.nframe() is > 0 there).
 if (sys.nframe() == 0L) {
     args <- commandArgs(trailingOnly = TRUE)

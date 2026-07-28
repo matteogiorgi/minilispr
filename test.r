@@ -1,10 +1,10 @@
 #!/usr/bin/env Rscript
 
-# test_minilisp.r -- pure-R test suite for minilisp.r, TAP output, exits with
+# test.r -- pure-R test suite for minilisp.r, TAP output, exits with
 # status 1 if anything fails.
 #
-#   Rscript test_minilisp.r                 # run
-#   Rscript test_minilisp.r | tap-difflet   # or any other TAP consumer
+#   Rscript test.r                 # run
+#   Rscript test.r | tap-difflet   # or any other TAP consumer
 #
 # No dependencies (no testthat): a ~15-line mini test framework, TAP 13
 # output that composes with standard Unix tools, and an explicit exit-code
@@ -12,7 +12,7 @@
 
 
 .script_dir <- function() {
-    # Preferred path: when run as `Rscript test_minilisp.r`, R puts the
+    # Preferred path: when run as `Rscript test.r`, R puts the
     # script's own path in commandArgs() as a --file=... entry.
     file_arg <- grep("--file=", commandArgs(trailingOnly = FALSE), value = TRUE)
     if (length(file_arg) > 0) {

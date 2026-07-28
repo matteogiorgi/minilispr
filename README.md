@@ -1,4 +1,4 @@
-# minilisp.r
+# minilispr
 
 A tiny Lisp that compiles to R language objects and runs on R's own `eval()`.
 
@@ -25,8 +25,8 @@ A pleasant consequence: `if`, `while`, `function`, `<-` and `{` are not special 
 source text --tokenize--> tokens --read_all--> S-expressions --to_r--> R call objects --eval()--> value
 ```
 
-- **Tokenizer** (`tokenize`) — character-by-character lexer. Handles string literals with embedded spaces, `\"` escapes, and `;` line comments, which a naive `strsplit()`-on-whitespace tokenizer would mangle.
-- **Reader** (`read_from_tokens`, `read_all`, `atom`) — classic recursive descent over the token stream, producing nested R lists as S-expressions. Atoms get their final R type here: numbers, strings, `TRUE`/`FALSE`, or symbols (`as.name`).
+- **Tokenizer** (`tokenize`) — character-by-character lexer. Handles string literals with embedded spaces and escapes, and `;` line comments, which a naive `strsplit()`-on-whitespace tokenizer would mangle.
+- **Reader** (`read_from_tokens`, `read_all`, `atom`) — classic recursive descent over the token stream, producing nested R lists as S-expressions. Atoms get their final R type here: numbers, strings (with `\n`/`\t`/`\"`/`\\` unescaped), `TRUE`/`FALSE`, or symbols (`as.name`).
 - **Translator** (`to_r`) — purely syntactic S-expression -> R `call`/`name` conversion. No Lisp code is executed at this stage; closures only come into existence once the resulting call is `eval()`'d, so they capture whatever environment is active at that point with nothing threaded around by hand.
 - **Driver** (`lisp_eval`) — reads and evaluates every top-level form from a source string in one shared environment, so a `define` is visible to the forms that follow it.
 
@@ -45,7 +45,7 @@ source text --tokenize--> tokens --read_all--> S-expressions --to_r--> R call ob
 | `define` | `(define x 5)`, `(define (f a b) (+ a b))` | both variable and function-shorthand forms |
 | `lambda` / `fn` | `(lambda (x y) (+ x y))` | builds a real R closure at eval-time |
 | `let` | `(let ((a 1) (b 2)) (+ a b))` | desugars to an immediately-invoked lambda (IIFE) |
-| Strings | `(paste "hello" "world")` | double-quoted, minimal `\"` escaping |
+| Strings | `(paste "hello" "world")` | double-quoted; supports `\n`, `\t`, `\"`, `\\` escapes |
 | Closures | `(define (adder n) (lambda (x) (+ x n)))` | lexical scoping, courtesy of R |
 | Recursion | `(define (fact n) (if (< n 2) 1 (* n (fact (- n 1)))))` | plain self-reference via R's own scoping |
 
@@ -65,7 +65,13 @@ Any symbol that isn't one of the forms above is passed straight through as a fun
 ./minilisp.r program.lisp
 ```
 
-This only fires when the file is run directly; `test_minilisp.r` sources it as a plain R library instead, so the two uses don't interfere with each other.
+This only fires when the file is run directly; `test.r` sources it as a plain R library instead, so the two uses don't interfere with each other.
+
+[demo.lisp](demo.lisp) is a short tour of the language — arithmetic, `if`, `lambda`, `let`, closures, recursion, strings, `while` — runnable as-is:
+
+```bash
+./minilisp.r demo.lisp
+```
 
 
 ### From R
@@ -96,8 +102,8 @@ lisp_eval("(+ x 5)", env) # 15
 ## Tests
 
 ```bash
-./test_minilisp.r
-# or: Rscript test_minilisp.r
+./test.r
+# or: Rscript test.r
 ```
 
 Dependency-free TAP 13 output (~15-line test framework, no `testthat`), composable with any TAP consumer. Covers the tokenizer, reader, translator and driver end-to-end, plus a golden test comparing `lisp_eval()` output against the equivalent hand-written R expression evaluated natively.
@@ -110,7 +116,8 @@ Dependency-free TAP 13 output (~15-line test framework, no `testthat`), composab
 | File | Purpose |
 |---|---|
 | [minilisp.r](minilisp.r) | The whole implementation: tokenizer, reader, translator, driver, CLI entry point |
-| [test_minilisp.r](test_minilisp.r) | TAP test suite |
+| [test.r](test.r) | TAP test suite |
+| [demo.lisp](demo.lisp) | Runnable example touring the supported language |
 
 
 
