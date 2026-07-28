@@ -33,8 +33,6 @@
 source(file.path(.script_dir(), "minilisp.r"))
 
 
-
-
 ## Minimal TAP framework
 .n <- 0L
 .fail <- 0L

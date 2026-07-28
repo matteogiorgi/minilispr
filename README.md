@@ -14,7 +14,7 @@ A tiny Lisp that compiles to R language objects and runs on R's own `eval()`.
 
 Most toy Lisps (SICP's `metacircular-evaluator`, for example) spend most of their code on a hand-written evaluator: an `eval`/`apply` pair that manages its own environments, its own scoping rules, its own closures. This project skips that step on purpose. R already has all of it — lexically scoped environments, closures, a garbage collector — so once Lisp source has been turned into an R `call` object, plain `eval()` does the rest. What's left to build is genuinely small: a reader and a syntactic translator, not an interpreter.
 
-A pleasant consequence: `if`, `while`, `function`, `<-` and `{` are not special syntax in R, they're ordinary calls with backtick-able names (`` `if`(cond, a, b) `` really does work). So most Lisp special forms need no special-casing in the translator at all — `(if c a b)` becomes `` as.call(list(as.name("if"), c, a, b)) `` and R runs it correctly. Only a handful of forms (`define`, `lambda`/`fn`, `let`, variadic arithmetic) need real translation logic; everything else falls through to a generic "S-expression to call" conversion. See [conversation.md](conversation.md) for the full design discussion this project started from.
+A pleasant consequence: `if`, `while`, `function`, `<-` and `{` are not special syntax in R, they're ordinary calls with backtick-able names (`` `if`(cond, a, b) `` really does work). So most Lisp special forms need no special-casing in the translator at all — `(if c a b)` becomes `` as.call(list(as.name("if"), c, a, b)) `` and R runs it correctly. Only a handful of forms (`define`, `lambda`/`fn`, `let`, variadic arithmetic) need real translation logic; everything else falls through to a generic "S-expression to call" conversion.
 
 
 
@@ -47,7 +47,7 @@ source text --tokenize--> tokens --read_all--> S-expressions --to_r--> R call ob
 | `let` | `(let ((a 1) (b 2)) (+ a b))` | desugars to an immediately-invoked lambda (IIFE) |
 | Strings | `(paste "hello" "world")` | double-quoted, minimal `\"` escaping |
 | Closures | `(define (adder n) (lambda (x) (+ x n)))` | lexical scoping, courtesy of R |
-| Recursion | `(define (fact n) (if (< n 2) 1 (* n (fact (- n 1))))))` | plain self-reference via R's own scoping |
+| Recursion | `(define (fact n) (if (< n 2) 1 (* n (fact (- n 1)))))` | plain self-reference via R's own scoping |
 
 Any symbol that isn't one of the forms above is passed straight through as a function call, so any R function is callable from Lisp for free — `(paste "a" "b")`, `(nchar "lisp")`, `(sqrt 16)`, and so on.
 
@@ -55,6 +55,7 @@ Any symbol that isn't one of the forms above is passed straight through as a fun
 
 
 ## Usage
+
 
 ### From the command line
 
@@ -72,7 +73,7 @@ This only fires when the file is run directly; `test_minilisp.r` sources it as a
 ```r
 source("minilisp.r")
 
-lisp_eval("(+ 1 2)")                       # 3
+lisp_eval("(+ 1 2)")                        # 3
 lisp_eval("(define (sq x) (* x x)) (sq 7)") # 49
 
 # inspect the intermediate stages
@@ -95,7 +96,8 @@ lisp_eval("(+ x 5)", env) # 15
 ## Tests
 
 ```bash
-Rscript test_minilisp.r
+./test_minilisp.r
+# or: Rscript test_minilisp.r
 ```
 
 Dependency-free TAP 13 output (~15-line test framework, no `testthat`), composable with any TAP consumer. Covers the tokenizer, reader, translator and driver end-to-end, plus a golden test comparing `lisp_eval()` output against the equivalent hand-written R expression evaluated natively.
@@ -109,7 +111,6 @@ Dependency-free TAP 13 output (~15-line test framework, no `testthat`), composab
 |---|---|
 | [minilisp.r](minilisp.r) | The whole implementation: tokenizer, reader, translator, driver, CLI entry point |
 | [test_minilisp.r](test_minilisp.r) | TAP test suite |
-| [conversation.md](conversation.md) | The design conversation this project started from |
 
 
 

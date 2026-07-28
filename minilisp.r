@@ -14,12 +14,12 @@
 #
 # Covered so far: arithmetic, comparisons, if/while/{ }, define, lambda, let,
 # function calls, strings, closures, recursion. Macros and TCO are planned as
-# follow-up extensions (see conversation.md for the design rationale).
+# follow-up extensions.
+
 
 ## 1. Tokenizer -- character-by-character, so that string literals containing
 ## spaces and line comments are handled correctly. A naive
 ## strsplit-on-whitespace tokenizer would break on both of those.
-
 tokenize <- function(src) {
     chars <- strsplit(src, "", fixed = TRUE)[[1]]
     toks <- character(0)
@@ -27,11 +27,11 @@ tokenize <- function(src) {
     n <- length(chars)
     while (i <= n) {
         ch <- chars[[i]]
-        if (ch %in% c(" ", "\t", "\n", "\r")) { # skip whitespace
+        if (ch %in% c(" ", "\t", "\n", "\r")) {
             i <- i + 1L
-        } else if (ch == ";") { # line comment: skip everything up to the newline
+        } else if (ch == ";") {
             while (i <= n && chars[[i]] != "\n") i <- i + 1L
-        } else if (ch == "(" || ch == ")") { # parens are always standalone single-char tokens
+        } else if (ch == "(" || ch == ")") {
             toks <- c(toks, ch)
             i <- i + 1L
         } else if (ch == "\"") { # string literal: the token keeps its surrounding quotes
@@ -54,7 +54,7 @@ tokenize <- function(src) {
             buf <- paste0(buf, "\"")
             toks <- c(toks, buf)
             i <- j + 1L
-        } else { # atom (symbol/number): read up to the next delimiter
+        } else {
             j <- i
             buf <- ""
             while (j <= n && !(chars[[j]] %in% c(" ", "\t", "\n", "\r", "(", ")", ";", "\""))) {
@@ -68,15 +68,16 @@ tokenize <- function(src) {
     toks
 }
 
+
 ## 2. Reader -- turns the flat token stream into nested lists (our
 ## S-expressions). Atoms are given their final R type right here.
-
 atom <- function(tok) {
     if (startsWith(tok, "\"")) { # string: strip the surrounding quotes, then unescape
         inner <- substr(tok, 2L, nchar(tok) - 1L)
         inner <- gsub("\\\"", "\"", inner, fixed = TRUE)
         return(inner)
     }
+
     # TRUE/FALSE and their R aliases T/F are resolved to actual booleans right
     # here, instead of being left as symbols to be looked up at eval-time.
     # Trade-off: a Lisp program written against this reader can never define
@@ -93,7 +94,7 @@ atom <- function(tok) {
     if (!is.na(num)) {
         return(num)
     }
-    as.name(tok) # anything left over is a symbol
+    as.name(tok)
 }
 
 read_from_tokens <- function(toks) {
@@ -116,7 +117,7 @@ read_from_tokens <- function(toks) {
     }
 }
 
-read_all <- function(src) { # read every top-level form found in src
+read_all <- function(src) {
     toks <- tokenize(src)
     forms <- list()
     while (length(toks) > 0) {
@@ -127,19 +128,19 @@ read_all <- function(src) { # read every top-level form found in src
     forms
 }
 
+
 ## 3. Translator -- S-expression -> R language object (a call/name/atom that
 ## eval() can run directly, with no separate evaluator of our own).
-
 make_formals <- function(params) { # build a formals pairlist, no default values
     if (length(params) == 0) {
         return(NULL)
     }
+
     # Every parameter needs the "argument is missing" placeholder as its
     # default value in the formals pairlist; quote(expr = ) is the idiomatic
     # way to produce that special empty symbol in R. Building formals() by
     # hand like this (rather than manipulating an existing function's
-    # formals()/body()) is the first real R-specific trap in this project --
-    # see conversation.md.
+    # formals()/body()) is the first real R-specific trap in this project.
     fmls <- replicate(length(params), quote(expr = ), simplify = FALSE)
     names(fmls) <- params
     as.pairlist(fmls)
@@ -206,7 +207,7 @@ to_r <- function(x) {
             vals <- lapply(binds, function(b) to_r(b[[2]]))
             body <- lapply(x[-(1:2)], to_r)
             fn <- make_fn_expr(params, wrap_body(body))
-            return(as.call(c(list(fn), vals))) # IIFE: (function(..) body)(vals)
+            return(as.call(c(list(fn), vals)))
         }
 
         if (op == "define") {
@@ -225,21 +226,22 @@ to_r <- function(x) {
 
     # Generic call: everything not special-cased above falls through here,
     # including if/while/{ (which are already ordinary R calls under the
-    # hood -- see conversation.md) and plain function application, e.g. the
-    # ((lambda (x) x) 5) case where head is itself a nested list.
+    # hood) and plain function application, e.g. the ((lambda (x) x) 5)
+    # case where head is itself a nested list.
     as.call(lapply(x, to_r))
 }
+
 
 ## 4. Driver -- reads and evaluates every top-level form from src in a single
 ## shared environment, so later forms can see bindings made by earlier ones
 ## (e.g. define followed by a reference).
-
 lisp_eval <- function(src, env = new.env(parent = globalenv())) {
     forms <- read_all(src)
     result <- NULL
     for (f in forms) result <- eval(to_r(f), env)
     result
 }
+
 
 ## CLI entry point -- runs a Lisp source file and prints its result. Guarded
 ## by sys.nframe() == 0L so it only fires when this file is executed
