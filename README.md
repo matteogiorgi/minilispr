@@ -73,6 +73,21 @@ This only fires when the file is run directly; `test.r` sources it as a plain R 
 ./minilisp.r demo.lisp
 ```
 
+`minilisp.r` never looks up its own location, so it works the same whether you run it in place or through a symlink. To make it available system-wide as `minilispr`, symlink it into a directory already on your `PATH` — `~/.local/bin` is the standard per-user one on most Linux distros:
+
+```bash
+mkdir -p ~/.local/bin
+ln -s "$(pwd)/minilisp.r" ~/.local/bin/minilispr
+```
+
+Then from anywhere:
+
+```bash
+minilispr demo.lisp
+```
+
+(If `~/.local/bin` isn't already on your `PATH`, add `export PATH="$HOME/.local/bin:$PATH"` to your shell's rc file.)
+
 
 ### From R
 
