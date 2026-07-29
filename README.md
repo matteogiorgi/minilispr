@@ -1,4 +1,4 @@
-# minilispr
+# Mini-Lisp-R
 
 A tiny Lisp that compiles to R language objects and runs on R's own `eval()`.
 
