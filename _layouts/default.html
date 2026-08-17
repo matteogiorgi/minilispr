@@ -2,20 +2,27 @@
 <html lang="{{ page.lang | default: site.lang | default: "en-US" }}">
     <head>
         <meta charset="UTF-8">
-        <!-- Must precede the script below: it looks this up by id, so it
-             needs to already be parsed. -->
-        <link rel="icon" id="favicon" type="image/svg+xml" href="https://geoteo.net/static/favicon.svg">
         <script>
             (function () {
                 window.applyTheme = function () {
                     var t = localStorage.getItem('theme');
                     if (t) document.documentElement.setAttribute('data-theme', t);
                     var dark = document.documentElement.getAttribute('data-theme') === 'dark';
+                    // The query string is load-bearing: browsers cache the tab
+                    // favicon per page URL and often won't re-fetch it on reload
+                    // just because the <link> href changed, so each theme needs
+                    // a genuinely distinct URL to force a fresh icon.
                     var src = dark
-                        ? 'https://geoteo.net/static/favicon-dark.svg'
-                        : 'https://geoteo.net/static/favicon.svg';
-                    var icon = document.getElementById('favicon');
-                    if (icon) icon.href = src;
+                        ? 'https://geoteo.net/static/favicon-dark.svg?theme=dark'
+                        : 'https://geoteo.net/static/favicon.svg?theme=light';
+                    var old = document.getElementById('favicon');
+                    if (old) old.remove();
+                    var icon = document.createElement('link');
+                    icon.id = 'favicon';
+                    icon.rel = 'icon';
+                    icon.type = 'image/svg+xml';
+                    icon.href = src;
+                    document.head.appendChild(icon);
                 };
                 applyTheme();
                 window.addEventListener('pageshow', function (e) {
@@ -53,8 +60,7 @@
                 {{ content }}
             </main>
             <p class="gh-footer">
-                <span>Powered by <a href="https://geoteo.net">geoteo.net</a></span>
-                <span><a href="{{ site.github.repository_url }}">{{ site.github.repository_nwo }}</a> on GitHub</span>
+                <a href="{{ site.github.repository_url }}">{{ site.github.repository_name }}</a> powered by <a href="https://geoteo.net">Geoteo</a>
             </p>
         </div>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/anchor-js/4.1.0/anchor.min.js" integrity="sha256-lZaRhKri35AyJSypXXs4o6OPFTbTmUoltBbDCbdzegg=" crossorigin="anonymous"></script>
