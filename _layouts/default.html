@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="{{ page.lang | default: site.lang | default: "en-US" }}">
+    <head>
+        <meta charset="UTF-8">
+        <script>
+            (function () {
+                var t = localStorage.getItem('theme');
+                if (t) document.documentElement.setAttribute('data-theme', t);
+            })();
+        </script>
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        {% seo %}
+        <link rel="icon" type="image/svg+xml" href="https://geoteo.net/static/favicon.svg">
+        <link rel="stylesheet" href="https://geoteo.net/static/style.css">
+        {% include head-custom.html %}
+    </head>
+    <body>
+        <button id="theme-toggle" type="button" class="theme-toggle" aria-label="Toggle dark mode">
+            <svg class="icon-moon" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
+                <mask id="moon-mask">
+                <rect width="24" height="24" fill="white"/>
+                <circle cx="15" cy="9" r="7" fill="black"/>
+                </mask>
+                <circle cx="12" cy="12" r="9" fill="currentColor" mask="url(#moon-mask)"/>
+            </svg>
+            <svg class="icon-sun" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+                <circle cx="12" cy="12" r="5" fill="currentColor" stroke="none"/>
+                <line x1="12" y1="2" x2="12" y2="4"/><line x1="12" y1="20" x2="12" y2="22"/>
+                <line x1="4" y1="12" x2="2" y2="12"/><line x1="22" y1="12" x2="20" y2="12"/>
+                <line x1="5.6" y1="5.6" x2="4.2" y2="4.2"/><line x1="19.8" y1="19.8" x2="18.4" y2="18.4"/>
+                <line x1="5.6" y1="18.4" x2="4.2" y2="19.8"/><line x1="19.8" y1="4.2" x2="18.4" y2="5.6"/>
+            </svg>
+        </button>
+        <div class="container-lg px-3 my-5 markdown-body">
+            <main>
+                {{ content }}
+            </main>
+            <p class="gh-footer">
+                <a href="{{ site.github.repository_url }}">{{ site.github.repository_nwo }}</a> on GitHub
+            </p>
+        </div>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/anchor-js/4.1.0/anchor.min.js" integrity="sha256-lZaRhKri35AyJSypXXs4o6OPFTbTmUoltBbDCbdzegg=" crossorigin="anonymous"></script>
+        <script>anchors.add();</script>
+        <script>
+            (function () {
+                var btn = document.getElementById('theme-toggle');
+                btn.addEventListener('click', function () {
+                    var next = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+                    document.documentElement.setAttribute('data-theme', next);
+                    localStorage.setItem('theme', next);
+                });
+            })();
+        </script>
+    </body>
+</html>
