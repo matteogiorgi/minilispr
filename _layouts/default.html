@@ -4,8 +4,14 @@
         <meta charset="UTF-8">
         <script>
             (function () {
-                var t = localStorage.getItem('theme');
-                if (t) document.documentElement.setAttribute('data-theme', t);
+                function applyTheme() {
+                    var t = localStorage.getItem('theme');
+                    if (t) document.documentElement.setAttribute('data-theme', t);
+                }
+                applyTheme();
+                window.addEventListener('pageshow', function (e) {
+                    if (e.persisted) applyTheme();
+                });
             })();
         </script>
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
