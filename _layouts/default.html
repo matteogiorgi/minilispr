@@ -2,12 +2,21 @@
 <html lang="{{ page.lang | default: site.lang | default: "en-US" }}">
     <head>
         <meta charset="UTF-8">
+        <!-- Must precede the script below: it looks this up by id, so it
+             needs to already be parsed. -->
+        <link rel="icon" id="favicon" type="image/svg+xml" href="https://geoteo.net/static/favicon.svg">
         <script>
             (function () {
-                function applyTheme() {
+                window.applyTheme = function () {
                     var t = localStorage.getItem('theme');
                     if (t) document.documentElement.setAttribute('data-theme', t);
-                }
+                    var dark = document.documentElement.getAttribute('data-theme') === 'dark';
+                    var src = dark
+                        ? 'https://geoteo.net/static/favicon-dark.svg'
+                        : 'https://geoteo.net/static/favicon.svg';
+                    var icon = document.getElementById('favicon');
+                    if (icon) icon.href = src;
+                };
                 applyTheme();
                 window.addEventListener('pageshow', function (e) {
                     if (e.persisted) applyTheme();
@@ -17,7 +26,6 @@
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         {% seo %}
-        <link rel="icon" type="image/svg+xml" href="https://geoteo.net/static/favicon.svg">
         <link rel="stylesheet" href="https://geoteo.net/static/style.css">
         <script src="https://geoteo.net/static/mathjax-config.js"></script>
         <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
@@ -45,7 +53,8 @@
                 {{ content }}
             </main>
             <p class="gh-footer">
-                <a href="{{ site.github.repository_url }}">{{ site.github.repository_nwo }}</a> on GitHub
+                <span>Powered by <a href="https://geoteo.net">geoteo.net</a></span>
+                <span><a href="{{ site.github.repository_url }}">{{ site.github.repository_nwo }}</a> on GitHub</span>
             </p>
         </div>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/anchor-js/4.1.0/anchor.min.js" integrity="sha256-lZaRhKri35AyJSypXXs4o6OPFTbTmUoltBbDCbdzegg=" crossorigin="anonymous"></script>
@@ -57,6 +66,7 @@
                     var next = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
                     document.documentElement.setAttribute('data-theme', next);
                     localStorage.setItem('theme', next);
+                    window.applyTheme();
                 });
             })();
         </script>
