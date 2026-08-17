@@ -22,7 +22,7 @@ A pleasant consequence: `if`, `while`, `function`, `<-` and `{` are not special 
 ## Architecture
 
 ```
-source text --tokenize--> tokens --read_all--> S-expressions --to_r--> R call objects --eval()--> value
+source text --tokenize --> tokens --read_all --> S-expressions --to_r --> R call objects --eval() --> value
 ```
 
 - **Tokenizer** (`tokenize`) — character-by-character lexer. Handles string literals with embedded spaces and escapes, and `;` line comments, which a naive `strsplit()`-on-whitespace tokenizer would mangle.
@@ -67,7 +67,7 @@ Any symbol that isn't one of the forms above is passed straight through as a fun
 
 This only fires when the file is run directly; `test.r` sources it as a plain R library instead, so the two uses don't interfere with each other.
 
-[demo.lisp](demo.lisp) is a short tour of the language — arithmetic, `if`, `lambda`, `let`, closures, recursion, strings, `while` — runnable as-is:
+[demo.lisp](https://github.com/matteogiorgi/minilispr/blob/main/demo.lisp) is a short tour of the language — arithmetic, `if`, `lambda`, `let`, closures, recursion, strings, `while` — runnable as-is:
 
 ```bash
 ./minilisp.r demo.lisp
@@ -130,9 +130,9 @@ Dependency-free TAP 13 output (~15-line test framework, no `testthat`), composab
 
 | File | Purpose |
 |---|---|
-| [minilisp.r](minilisp.r) | The whole implementation: tokenizer, reader, translator, driver, CLI entry point |
-| [test.r](test.r) | TAP test suite |
-| [demo.lisp](demo.lisp) | Runnable example touring the supported language |
+| [minilisp.r](https://github.com/matteogiorgi/minilispr/blob/main/minilisp.r) | The whole implementation: tokenizer, reader, translator, driver, CLI entry point |
+| [test.r](https://github.com/matteogiorgi/minilispr/blob/main/test.r) | TAP test suite |
+| [demo.lisp](https://github.com/matteogiorgi/minilispr/blob/main/demo.lisp) | Runnable example touring the supported language |
 
 
 
