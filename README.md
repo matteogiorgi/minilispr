@@ -10,7 +10,7 @@ A tiny Lisp that compiles to R language objects and runs on R's own `eval()`.
 
 
 
-## Why R's own eval()
+## Why R's own `eval()`
 
 Most toy Lisps (SICP's `metacircular-evaluator`, for example) spend most of their code on a hand-written evaluator: an `eval`/`apply` pair that manages its own environments, its own scoping rules, its own closures. This project skips that step on purpose. R already has all of it — lexically scoped environments, closures, a garbage collector — so once Lisp source has been turned into an R `call` object, plain `eval()` does the rest. What's left to build is genuinely small: a reader and a syntactic translator, not an interpreter.
 
