@@ -27,7 +27,7 @@ source text --tokenize --> tokens --read_all --> S-expressions --to_r --> R call
 
 - **Tokenizer** (`tokenize`) — character-by-character lexer. Handles string literals with embedded spaces and escapes, and `;` line comments, which a naive `strsplit()`-on-whitespace tokenizer would mangle.
 - **Reader** (`read_from_tokens`, `read_all`, `atom`) — classic recursive descent over the token stream, producing nested R lists as S-expressions. Atoms get their final R type here: numbers, strings (with `\n`/`\t`/`\"`/`\\` unescaped), `TRUE`/`FALSE`, or symbols (`as.name`).
-- **Translator** (`to_r`) — purely syntactic S-expression → R `call`/`name` conversion. No Lisp code is executed at this stage; closures only come into existence once the resulting call is `eval()`'d, so they capture whatever environment is active at that point with nothing threaded around by hand.
+- **Translator** (`to_r`) — purely syntactic S-expression $\to$ R `call`/`name` conversion. No Lisp code is executed at this stage; closures only come into existence once the resulting call is `eval()`'d, so they capture whatever environment is active at that point with nothing threaded around by hand.
 - **Driver** (`lisp_eval`) — reads and evaluates every top-level form from a source string in one shared environment, so a `define` is visible to the forms that follow it.
 
 
@@ -139,7 +139,7 @@ Dependency-free TAP 13 output (~15-line test framework, no `testthat`), composab
 
 ## Roadmap
 
-Milestones so far: arithmetic + `if` → `define`/`lambda`/`let` → strings, closures, recursion, `while`. What's next, in increasing order of how much fun it is:
+Milestones so far: arithmetic + `if` $\to$ `define`/`lambda`/`let` $\to$ strings, closures, recursion, `while`. What's next, in increasing order of how much fun it is:
 
 - **Macros** — the reader already hands code over as data (a `call` is a list you can take apart and rebuild), so a macro is just a function that receives unevaluated code and returns code. R's `bquote()`/`.()` gives quasiquote/unquote for free.
 - **Hygiene** — without care, macros get variable capture; fixed with a `gensym` that mints guaranteed-unique names to inject into expansions.
